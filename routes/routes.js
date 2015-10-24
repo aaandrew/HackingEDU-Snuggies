@@ -25,7 +25,7 @@ module.exports = function(app, client) {
 		});
 	});
 
-	app.createQuestion(function(text){
+	app.createQuestion = function(text){
 		var words = text.split(".");
 		//title = first sentance
 		var title = words[0];
