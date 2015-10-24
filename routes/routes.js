@@ -43,7 +43,7 @@ module.exports = function(app, client) {
 		}
 		console.log(question);
 		return question;
-	};
+	});
 };
 
 function mostCommonWords (words) {
