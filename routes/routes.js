@@ -3,6 +3,9 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var models = require('../models');
 
+var STACK_ACCESS_TOKEN = 'wKyP96EISkn6rXshtjVxVQ))';
+var STACK_KEY = 'efqKQOx8J*GTOI1*6hs0KA((';
+
 // Saves a question to the DB
 var createQuestion = function(questionId, phoneNumber){
 	var newQuestion = new models.Question({
@@ -47,8 +50,12 @@ var createAnswer = function(questionId, reqAnswer, reqMessage, reqTime){
    });
 };
 
+// Posts question to stack overflow
+var postQuestionToStack = function(message){
+	console.log("posting", message);
 
-var question;
+	
+};
 
 
 // Configure appplication routes
@@ -65,7 +72,12 @@ module.exports = function(app, client) {
 
 		console.log("Messages", phone);
 		console.log("Messages", message);
+
+		// Save question to DB
 		createQuestion(phone, message);
+
+		// Post question to stack overflow
+		postQuestionToStack(message);
 
 		// client.messages.create({ 
 		// 	to: "6192071673", 
@@ -99,14 +111,13 @@ module.exports = function(app, client) {
 		}
 		//tag = most commonly used word
 		var tags = mostCommonWords(text.split(" "));
-		question = {
+		var question = {
 			"title": title,
 			"body": body,
 			"tags": tags
 		}
 		console.log(sentances);
 		console.log(question);
-		return question;
 	});
 };
 
