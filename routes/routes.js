@@ -26,10 +26,11 @@ module.exports = function(app, client) {
 	});
 
 	app.createQuestion(function(text){
+		var words = text.split(".");
 		//title = first sentance
-		var title = text.split(".")[0];
+		var title = words[0];
 		//body = rest of text
-		var body = text.split(".")[1:];
+		var body = words.slice(1,text.split(1,words.length));
 		//tag = most commonly used word
 		var tags = mostCommonWords(text.split(" "));
 	});
