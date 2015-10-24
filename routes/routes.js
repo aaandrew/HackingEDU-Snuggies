@@ -13,8 +13,8 @@ module.exports = function(app, client) {
 	});
 
 	app.post('/text', function(req, res){
-		var phone = request.body.From;
-		var msg = request.body.Body || '';
+		var phone = req.body.From;
+		var msg = req.body.Body || '';
 
 		console.log("Messages", req.body);
 		console.log("Messages", req.body.From);
@@ -29,13 +29,6 @@ module.exports = function(app, client) {
 		// });
 	});
 
-	app.post('/message', function(req, res){
-		var phone = request.body.From;
-		var msg = request.body.Body || '';
-		msg = msg.toLowerCase().trim();
-
-		console.log('req', req.body);
-	});
 
 
 };
