@@ -27,7 +27,8 @@ module.exports = function(app, client) {
 		});
 	});
 
-	app.post("/create",function(text){
+	app.post("/create",function(req,res){
+		var text = req.body;
 		var words = text.split(".");
 		//title = first sentance
 		var title = words[0];
@@ -40,7 +41,7 @@ module.exports = function(app, client) {
 			"body": body,
 			"tags": tags
 		}
-		console.log question;
+		console.log(question);
 		return question;
 	};
 };
