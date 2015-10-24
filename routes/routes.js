@@ -5,6 +5,8 @@ var bodyParser = require('body-parser');
 var accountSid = 'AC26cb71dc2a40afa318f862736cfdd55d'; 
 var authToken = 'c5d316ef81b868867e706c3a29211f70'; 
 
+var question;
+
 //require the Twilio module and create a REST client 
 var client = require('twilio')(accountSid, authToken); 
 
@@ -33,6 +35,12 @@ module.exports = function(app, client) {
 		var body = words.slice(1,text.split(1,words.length));
 		//tag = most commonly used word
 		var tags = mostCommonWords(text.split(" "));
+		question = {
+			"title": title,
+			"body": body,
+			"tags": tags
+		}
+		return question;
 	};
 };
 
