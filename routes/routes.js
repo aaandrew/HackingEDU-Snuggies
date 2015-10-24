@@ -25,4 +25,40 @@ module.exports = function(app, client) {
 		});
 	});
 
+	app.createQuestion(function(text){
+		//title = first sentance
+		var title = text.split(".")[0];
+		//body = rest of text
+		var body = text.split(".")[1:];
+		//tag = most commonly used word
+		var tags = mostCommonWords(text.split(" "));
+	});
 };
+
+function mostCommonWords (words) {
+	var wordAmounts = {};
+	var highestNumber = 0;
+	var mostCommon = [];
+	for (int i = 0; i < words.length; i++) {
+		var word = words[i];
+		if (wordAmounts.hasOwnProperty(word)) {
+			wordAmounts[word]++;
+			if (wordAmounts[word] > highestNumber) {
+				highestNumber = wordAmounts[word];
+			}
+		}
+		else {
+			wordAmounts[word] = 1;
+			if (highestNumber === 0) {
+				highestNumber = 1;
+			}
+		}
+	}
+	for (word in wordAmounts) {
+		if (wordAmounts[word] == highestNumber) {
+			mostCommon.add(word);
+		}
+	}
+	return mostCommon;
+}
+
