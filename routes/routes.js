@@ -28,12 +28,19 @@ module.exports = function(app, client) {
 	});
 
 	app.post("/create",function(req,res){
-		var text = req.body;
-		var words = text.split(".");
+		var text = req.body.text.toLowerCase();
+		console.log(text);
+		var sentances = text.split("? ");
 		//title = first sentance
-		var title = words[0];
+		var title = sentances[0] + "?";
 		//body = rest of text
-		var body = words.slice(1,text.split(1,words.length));
+		var body;
+		if (sentances.length > 2) {
+			body = sentances.slice(1,text.split(1,sentances.length));
+		}
+		else {
+			body = sentances[1];
+		}
 		//tag = most commonly used word
 		var tags = mostCommonWords(text.split(" "));
 		question = {
@@ -41,6 +48,7 @@ module.exports = function(app, client) {
 			"body": body,
 			"tags": tags
 		}
+		console.log(sentances);
 		console.log(question);
 		return question;
 	});
@@ -50,6 +58,9 @@ function mostCommonWords (words) {
 	var wordAmounts = {};
 	var highestNumber = 0;
 	var mostCommon = [];
+
+	var commonWords = ["i","me","why","can't","it","you"];
+
 	for (var i = 0; i < words.length; i++) {
 		var word = words[i];
 		if (wordAmounts.hasOwnProperty(word)) {
@@ -66,10 +77,19 @@ function mostCommonWords (words) {
 		}
 	}
 	for (word in wordAmounts) {
-		if (wordAmounts[word] == highestNumber) {
-			mostCommon.add(word);
+		if (wordAmounts[word] == highestNumber && !(inArray(word,commonWords))) {
+			mostCommon.push(word);
 		}
 	}
 	return mostCommon;
 }
 
+function inArray(needle,haystack)
+{
+    var count=haystack.length;
+    for(var i=0;i<count;i++)
+    {
+        if(haystack[i]===needle){return true;}
+    }
+    return false;
+}
