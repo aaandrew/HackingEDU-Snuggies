@@ -40,7 +40,7 @@ function mostCommonWords (words) {
 	var wordAmounts = {};
 	var highestNumber = 0;
 	var mostCommon = [];
-	for (int i = 0; i < words.length; i++) {
+	for (var i = 0; i < words.length; i++) {
 		var word = words[i];
 		if (wordAmounts.hasOwnProperty(word)) {
 			wordAmounts[word]++;
