@@ -11,7 +11,7 @@ var questionSchema = mongoose.Schema({
 var answerSchema = mongoose.Schema({
 	answer_id : { type: String },
 	message: { type: String },
-	time: { type: Date}
+	time: { type: String}
 });
 
 
