@@ -33,7 +33,7 @@ module.exports = function(app, client) {
 		var body = words.slice(1,text.split(1,words.length));
 		//tag = most commonly used word
 		var tags = mostCommonWords(text.split(" "));
-	});
+	};
 };
 
 function mostCommonWords (words) {
