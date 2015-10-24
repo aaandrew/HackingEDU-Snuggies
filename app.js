@@ -5,6 +5,12 @@ var handlebars = require('express-handlebars');
 var app = express();
 var http = require('http').Server(app);
 
+var accountSid = 'ACe7874db6c92c30d733ccf07310448613'; 
+var authToken = '3c2263656c5efd649c7dd21158439c6c'; 
+
+//require the Twilio module and create a REST client 
+var client = require('twilio')(accountSid, authToken); 
+
 //Configures the Template engine
 app.engine('handlebars', handlebars({defaultLayout: 'layout'}));
 app.set('view engine', 'handlebars');
@@ -17,9 +23,7 @@ app.use(bodyParser.json());
 app.set('port', process.env.PORT || 3000);
 
 // Routes
-app.get('/', function(req, res){
-  res.render('index');
-});
+require('./routes/routes')(app, client);
 
 http.listen(app.get('port'), function() {
     console.log('Express server listening on port ' + app.get('port'));
