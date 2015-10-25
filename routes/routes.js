@@ -124,9 +124,9 @@ module.exports = function(app, client) {
 
 		// Post question to stack overflow
 		var arrMessages = message.split("---");
-		var title = arr[0];
-		var text = arr[1];
-		var tags = arr[2];
+		var title = arrMessages[0].trim();
+		var text = arrMessages[1].trim();
+		var tags = arrMessages[2].trim();
 		postQuestionToStack(title, text, tags, function(dataResponse){
 			console.log('here', dataResponse);
 			sendTwilioText(client,phone, dataResponse);
