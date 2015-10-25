@@ -7,6 +7,9 @@ var models = require('../models');
 var STACK_ACCESS_TOKEN = 'wKyP96EISkn6rXshtjVxVQ))';
 var STACK_KEY = 'efqKQOx8J*GTOI1*6hs0KA((';
 
+// Polling constants
+var timeoutDuration = 180000;
+
 // Saves a question to the DB
 var createQuestion = function(questionId, phoneNumber, timeCount){
 	var newQuestion = new models.Question({
@@ -58,7 +61,7 @@ var createAnswer = function(questionId, reqAnswer, reqMessage, reqTime, timeCoun
         		if(err) {
         			console.log(err);
         		} else {
-        			console.log('Question: ' + question_id + " updated.");
+        			console.log('Question: ' + questionId + " updated.");
         		}
         	});
         	// Send twilio text
@@ -119,39 +122,57 @@ var removeHTMLTags = function(text){
 	return result.replace(/(\r\n|\n|\r)/gm, " ");
 };
 
+var pollQuestion = function(questionId, client){
+	var prevUrl = 'https://api.stackexchange.com/2.2/questions/';
+	var endUrl = '/answers?order=desc&sort=activity&site=stackoverflow&filter=withbody';
+
+	var url = prevUrl + questionId + endUrl;
+
+	console.log('requesting', url);
+
+	request({url: url, gzip: true}, function (error, response, body) {
+		if (!error && response.statusCode == 200) {
+			var responseObj = JSON.parse(body);
+
+			// Add all answers to database
+			responseObj.items.forEach(function(item){
+				var strippedMessage = removeHTMLTags(item.body);
+				createAnswer(item.question_id, item.answer_id, strippedMessage, item.creation_date, '1', 
+					function(phoneNumber, answerMessage){
+						var outputtedMessage = item.owner.display_name + ": " + answerMessage;
+						sendTwilioText(client, phoneNumber, outputtedMessage);
+					});
+			});
+		}else{
+			console.log("error", error);
+		}
+	});
+};
+
 
 // Configure appplication routes
 module.exports = function(app, client) {
+
+	// Poll for new questions at1 interval duration
+	var interval = setInterval(function() {
+		models.Question.find({}, function(err, questions) {
+			questions.forEach(function(question) {
+				console.log(question.question_id);
+				pollQuestion(question.question_id, client);
+			});
+		});
+	}, timeoutDuration);
 
 	app.get('/', function(req, res){
 		res.render('index');
 	});
 
-	app.get('/pollQuestions', function(req, res){
-		var prevUrl = 'https://api.stackexchange.com/2.2/questions/';
-		var endUrl = '/answers?order=desc&sort=activity&site=stackoverflow&filter=withbody';
-
-		var questionIds = '33326055';
-
-		var url = prevUrl + questionIds + endUrl;
-
-		console.log('requesting', url);
-
-		request({url: url, gzip: true}, function (error, response, body) {
-			if (!error && response.statusCode == 200) {
-				var responseObj = JSON.parse(body);
-
-				// Add all answers to database
-				responseObj.items.forEach(function(item){
-					var strippedMessage = removeHTMLTags(item.body);
-					createAnswer(item.question_id, item.answer_id, strippedMessage, item.creation_date, '1', 
-						function(phoneNumber, answerMessage){
-							sendTwilioText(client, phoneNumber, answerMessage);
-					});
-				});
-			}else{
-				console.log("error", error);
-			}
+	app.get('/getQuestions', function(req, res){
+		models.Question.find({}, function(err, questions) {
+			questions.forEach(function(question) {
+				console.log(question.question_id);
+				pollQuestion(question.question_id, client);
+			});
 		});
 	});
 
