@@ -203,6 +203,7 @@ module.exports = function(app, client) {
 		}else{
 			sendTwilioText(client, phone, "Please format question as: <Title> --- <Body> --- <Tag>");
 		}
+		res.end();
 	});
 
 	app.post('/answer', function(req, res){
