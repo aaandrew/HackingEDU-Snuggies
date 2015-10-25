@@ -1,6 +1,7 @@
 var path = require('path');
 var express = require('express');
 var bodyParser = require('body-parser');
+var request = require('request');
 var models = require('../models');
 
 var STACK_ACCESS_TOKEN = 'wKyP96EISkn6rXshtjVxVQ))';
@@ -51,11 +52,45 @@ var createAnswer = function(questionId, reqAnswer, reqMessage, reqTime){
 };
 
 // Posts question to stack overflow
-var postQuestionToStack = function(message){
+var postQuestionToStack = function(title, message, tags, callback){
 	console.log("posting", message);
 
-	
+	var data = {
+		title: title,
+		body: message,
+		tags: tags,
+		key: STACK_KEY,
+		access_token: STACK_ACCESS_TOKEN,
+		preview: 'true',
+		filter: 'default',
+		site: 'stackoverflow'
+	};
+
+	request.post({url: 'https://api.stackexchange.com/2.2/questions/add', form: data, gzip: true},
+		function (error, response, body) {
+			var responseObj = JSON.parse(body);
+			if (!error && response.statusCode == 200) {
+	    	console.log(responseObj);
+	    	callback("Question successfully created!")
+	  	}else{
+	  		// Send error back to phone
+	  		console.log(responseObj.error_message);
+	  		callback(responseObj.error_message);
+	  	}
+	})
 };
+
+// Sends a twilio text to the specified phone number
+var sendTwilioText = function(client, receiver, text){
+	client.messages.create({ 
+		to: receiver, 
+		from: "+16198252456",
+		body: text
+	}, function(err, message) { 
+		console.log(message); 
+	});
+};
+
 
 
 // Configure appplication routes
@@ -63,6 +98,17 @@ module.exports = function(app, client) {
 
 	app.get('/', function(req, res){
 		res.render('index');
+	});
+
+	app.get('/cquestion', function(req,res){
+		var title = "Difference between public, static, and final";
+		//var message = "What is the difference between public, static, and final in java? I've tried looking it up on multiple sources, but have had no luck.";
+		var message = "something";
+		var tags = 'java';
+		postQuestionToStack(title, message, tags, function(dataResponse){
+			console.log('here', dataResponse);
+			sendTwilioText(client,phone, dataResponse);
+		});
 	});
 
 	app.post('/text', function(req, res){
@@ -77,15 +123,14 @@ module.exports = function(app, client) {
 		createQuestion(phone, message);
 
 		// Post question to stack overflow
-		postQuestionToStack(message);
-
-		// client.messages.create({ 
-		// 	to: "6192071673", 
-		// 	from: "+16198252456",
-		// 	body: req.body
-		// }, function(err, message) { 
-		// 	console.log(message); 
-		// });
+		var arrMessages = message.split("---");
+		var title = arr[0];
+		var text = arr[1];
+		var tags = arr[2];
+		postQuestionToStack(title, text, tags, function(dataResponse){
+			console.log('here', dataResponse);
+			sendTwilioText(client,phone, dataResponse);
+		});
 	});
 
 	app.post('/answer', function(req, res){

@@ -23,6 +23,7 @@
     "express-handlebars": "^2.0.1",
     "mongoose": "^4.2.2",
     "mongoose-findorcreate": "^0.1.2",
+    "request": "^2.65.0",
     "twilio": "^2.5.1"
   }
 }
