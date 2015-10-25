@@ -25,8 +25,18 @@ var createQuestion = function(questionId, phoneNumber, timeCount){
 	});
 };
 
+// Checks Answers array to see answer is present
+var checkAnswersArrayDuplicate = function(answers, answerId){
+	for(var i=0; i<answers.length; i++){
+		if(answers[i].answer_id == answerId){
+			return true;
+		}
+	}
+	return false;
+};
+
 // Saves an answer to a question
-var createAnswer = function(questionId, reqAnswer, reqMessage, reqTime, timeCount){
+var createAnswer = function(questionId, reqAnswer, reqMessage, reqTime, timeCount, callback){
 	var newAnswer = new models.Answer({
 		answer_id : reqAnswer,
 		message: reqMessage,
@@ -40,15 +50,20 @@ var createAnswer = function(questionId, reqAnswer, reqMessage, reqTime, timeCoun
       if (err || !question) {
         return;
       }else{
-        //update user here
-        question.answers.push(newAnswer);
-        question.save(function(err){
-        	if(err) {
-        		console.log(err);
-        	} else {
-        		console.log('Question: ' + newAnswer.question_id + " updated.");
-        	}
-        });
+        if(!checkAnswersArrayDuplicate(question.answers, reqAnswer)){
+        	// Answer not found so push to questions array
+        	// Save to DB
+        	question.answers.push(newAnswer);
+        	question.save(function(err){
+        		if(err) {
+        			console.log(err);
+        		} else {
+        			console.log('Question: ' + question_id + " updated.");
+        		}
+        	});
+        	// Send twilio text
+        	callback(question.phone, reqMessage);
+        }
       }
    });
 };
@@ -71,9 +86,7 @@ var postQuestionToStack = function(title, message, tags, phone, callback){
 	request.post({url: 'https://api.stackexchange.com/2.2/questions/add', form: data, gzip: true},
 		function (error, response, body) {
 			var responseObj = JSON.parse(body);
-			if (!error && response.statusCode == 200) {
-	    	console.log(responseObj);
-	    	
+			if (!error && response.statusCode == 200) {	    	
 	    	// Save question to DB
 	    	createQuestion(responseObj.items[0].question_id, phone, "1");
 
@@ -83,7 +96,7 @@ var postQuestionToStack = function(title, message, tags, phone, callback){
 	  		console.log(responseObj.error_message);
 	  		callback(responseObj.error_message);
 	  	}
-	})
+	});
 };
 
 // Sends a twilio text to the specified phone number
@@ -97,6 +110,14 @@ var sendTwilioText = function(client, receiver, text){
 	});
 };
 
+// Remove HTML tags from text
+var removeHTMLTags = function(text){
+	var regex = /(<([^>]+)>)/ig;
+	// Remove HTML Tags
+	var result = text.replace(regex, "");
+	// Remove new lines
+	return result.replace(/(\r\n|\n|\r)/gm, " ");
+};
 
 
 // Configure appplication routes
@@ -106,14 +127,31 @@ module.exports = function(app, client) {
 		res.render('index');
 	});
 
-	app.get('/cquestion', function(req,res){
-		var title = "Difference between public, static, and final";
-		//var message = "What is the difference between public, static, and final in java? I've tried looking it up on multiple sources, but have had no luck.";
-		var message = "something";
-		var tags = 'java';
-		postQuestionToStack(title, message, tags, function(dataResponse){
-			console.log('here', dataResponse);
-			sendTwilioText(client,phone, dataResponse);
+	app.get('/pollQuestions', function(req, res){
+		var prevUrl = 'https://api.stackexchange.com/2.2/questions/';
+		var endUrl = '/answers?order=desc&sort=activity&site=stackoverflow&filter=withbody';
+
+		var questionIds = '33326055';
+
+		var url = prevUrl + questionIds + endUrl;
+
+		console.log('requesting', url);
+
+		request({url: url, gzip: true}, function (error, response, body) {
+			if (!error && response.statusCode == 200) {
+				var responseObj = JSON.parse(body);
+
+				// Add all answers to database
+				responseObj.items.forEach(function(item){
+					var strippedMessage = removeHTMLTags(item.body);
+					createAnswer(item.question_id, item.answer_id, strippedMessage, item.creation_date, '1', 
+						function(phoneNumber, answerMessage){
+							sendTwilioText(client, phoneNumber, answerMessage);
+					});
+				});
+			}else{
+				console.log("error", error);
+			}
 		});
 	});
 
