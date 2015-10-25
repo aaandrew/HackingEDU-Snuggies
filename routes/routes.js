@@ -4,8 +4,8 @@ var bodyParser = require('body-parser');
 var request = require('request');
 var models = require('../models');
 
-var STACK_ACCESS_TOKEN = 'wKyP96EISkn6rXshtjVxVQ))';
-var STACK_KEY = 'efqKQOx8J*GTOI1*6hs0KA((';
+var STACK_ACCESS_TOKEN = 'bMRK4shRZlU7LlTlwNXJUA))';
+var STACK_KEY = 'tdN1YwerF4BEOUORE8A68w((';
 
 // Polling constants
 var timeoutDuration = 180000;
