@@ -8,7 +8,7 @@ var STACK_ACCESS_TOKEN = 'bMRK4shRZlU7LlTlwNXJUA))';
 var STACK_KEY = 'tdN1YwerF4BEOUORE8A68w((';
 
 // Polling constants
-var timeoutDuration = 180000;
+var timeoutDuration = 5000;
 
 // Saves a question to the DB
 var createQuestion = function(questionId, phoneNumber, timeCount){
