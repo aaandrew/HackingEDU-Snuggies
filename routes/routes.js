@@ -54,7 +54,7 @@ var createAnswer = function(questionId, reqAnswer, reqMessage, reqTime, timeCoun
 };
 
 // Posts question to stack overflow
-var postQuestionToStack = function(title, message, tags, callback){
+var postQuestionToStack = function(title, message, tags, phone, callback){
 	console.log("posting", message);
 
 	var data = {
@@ -75,7 +75,7 @@ var postQuestionToStack = function(title, message, tags, callback){
 	    	console.log(responseObj);
 	    	
 	    	// Save question to DB
-	    	createQuestion(phone, message, "1");
+	    	createQuestion(responseObj.items[0].question_id, phone, "1");
 
 	    	callback("Question successfully created!")
 	  	}else{
@@ -125,14 +125,13 @@ module.exports = function(app, client) {
 		console.log("Messages", phone);
 		console.log("Messages", message);
 
-
 		// Post question to stack overflow
 		var arrMessages = message.split("---");
 		if(arrMessages.length == 3){
 			var title = arrMessages[0].trim();
 			var text = arrMessages[1].trim();
 			var tags = arrMessages[2].trim();
-			postQuestionToStack(title, text, tags, function(dataResponse){
+			postQuestionToStack(title, text, tags, phone, function(dataResponse){
 				console.log('here', dataResponse);
 				sendTwilioText(client, phone, dataResponse);
 			});
