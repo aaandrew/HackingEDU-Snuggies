@@ -181,6 +181,12 @@ module.exports = function(app, client) {
 		var phone = req.body.From;
 		var message = req.body.Body || '';
 
+		// If asked for Help, send default message.
+		if(message.trim().toLowerCase() == 'tutorial'){
+			sendTwilioText(client, phone, "Welcome to AskOverflow! To ask a question format it as: '<Title> --- <Body> --- <Tag>', and we'll get back to you as soon as possible!");
+			res.end();
+		}
+
 		console.log("Messages", phone);
 		console.log("Messages", message);
 
