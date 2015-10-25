@@ -185,6 +185,7 @@ module.exports = function(app, client) {
 		if(message.trim().toLowerCase() == 'tutorial'){
 			sendTwilioText(client, phone, "Welcome to AskOverflow! To ask a question format it as: '<Title> --- <Body> --- <Tag>', and we'll get back to you as soon as possible!");
 			res.end();
+			return;
 		}
 
 		console.log("Messages", phone);
