@@ -8,11 +8,12 @@ var STACK_ACCESS_TOKEN = 'wKyP96EISkn6rXshtjVxVQ))';
 var STACK_KEY = 'efqKQOx8J*GTOI1*6hs0KA((';
 
 // Saves a question to the DB
-var createQuestion = function(questionId, phoneNumber){
+var createQuestion = function(questionId, phoneNumber, timeCount){
 	var newQuestion = new models.Question({
 		question_id : questionId,
 		answers: [],
-		phone: phoneNumber
+		phone: phoneNumber,
+		time_count: timeCount
 	});
 
 	newQuestion.save(function(err) {
@@ -25,11 +26,12 @@ var createQuestion = function(questionId, phoneNumber){
 };
 
 // Saves an answer to a question
-var createAnswer = function(questionId, reqAnswer, reqMessage, reqTime){
+var createAnswer = function(questionId, reqAnswer, reqMessage, reqTime, timeCount){
 	var newAnswer = new models.Answer({
 		answer_id : reqAnswer,
 		message: reqMessage,
-		time: reqTime
+		time: reqTime,
+		time_count: timeCount
 	});
 
 	models.Question.findOne({
@@ -61,7 +63,7 @@ var postQuestionToStack = function(title, message, tags, callback){
 		tags: tags,
 		key: STACK_KEY,
 		access_token: STACK_ACCESS_TOKEN,
-		preview: 'true',
+		//preview: 'true',
 		filter: 'default',
 		site: 'stackoverflow'
 	};
@@ -71,6 +73,10 @@ var postQuestionToStack = function(title, message, tags, callback){
 			var responseObj = JSON.parse(body);
 			if (!error && response.statusCode == 200) {
 	    	console.log(responseObj);
+	    	
+	    	// Save question to DB
+	    	createQuestion(phone, message, "1");
+
 	    	callback("Question successfully created!")
 	  	}else{
 	  		// Send error back to phone
@@ -119,25 +125,27 @@ module.exports = function(app, client) {
 		console.log("Messages", phone);
 		console.log("Messages", message);
 
-		// Save question to DB
-		createQuestion(phone, message);
 
 		// Post question to stack overflow
 		var arrMessages = message.split("---");
-		var title = arrMessages[0].trim();
-		var text = arrMessages[1].trim();
-		var tags = arrMessages[2].trim();
-		postQuestionToStack(title, text, tags, function(dataResponse){
-			console.log('here', dataResponse);
-			sendTwilioText(client,phone, dataResponse);
-		});
+		if(arrMessages.length == 3){
+			var title = arrMessages[0].trim();
+			var text = arrMessages[1].trim();
+			var tags = arrMessages[2].trim();
+			postQuestionToStack(title, text, tags, function(dataResponse){
+				console.log('here', dataResponse);
+				sendTwilioText(client, phone, dataResponse);
+			});
+		}else{
+			sendTwilioText(client, phone, "Please format question as: <Title> --- <Body> --- <Tag>");
+		}
 	});
 
 	app.post('/answer', function(req, res){
 		console.log(req.body)
 		var message = req.body.Body || '';
-
-		createAnswer('1', '1a', 'klsdjaf', 'dslkfja');
+		createQuestion('1', '3132131', '1');
+		//createAnswer('1', '1a', 'klsdjaf', 'dslkfja');
 	});
 
 	app.post("/create",function(req,res){
