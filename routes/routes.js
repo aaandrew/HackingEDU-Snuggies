@@ -4,11 +4,11 @@ var bodyParser = require('body-parser');
 var request = require('request');
 var models = require('../models');
 
-var STACK_ACCESS_TOKEN = 'bMRK4shRZlU7LlTlwNXJUA))';
-var STACK_KEY = 'tdN1YwerF4BEOUORE8A68w((';
+var STACK_ACCESS_TOKEN = '..';
+var STACK_KEY = '..';
 
 // Polling constants
-var timeoutDuration = 5000;
+var timeoutDuration = 18000;
 
 // Saves a question to the DB
 var createQuestion = function(questionId, phoneNumber, timeCount){
@@ -106,7 +106,7 @@ var postQuestionToStack = function(title, message, tags, phone, callback){
 var sendTwilioText = function(client, receiver, text){
 	client.messages.create({ 
 		to: receiver, 
-		from: "+16198252456",
+		from: "....",
 		body: text
 	}, function(err, message) { 
 		console.log(message); 

@@ -7,14 +7,14 @@ var http = require('http').Server(app);
 var mongoose = require('mongoose');
 
 // Twilio Keys
-var accountSid = 'AC26cb71dc2a40afa318f862736cfdd55d'; 
-var authToken = 'c5d316ef81b868867e706c3a29211f70'; 
+var accountSid = '....'; 
+var authToken = '....'; 
 
 //require the Twilio module and create a REST client 
 var client = require('twilio')(accountSid, authToken); 
 
 // Mongo Lab keys
-var MONGODB_CONNECTION_URL = 'mongodb://heroku_22ldzsg5:5glglplp52rhqtht8m9gcqonuh@ds043694.mongolab.com:43694/heroku_22ldzsg5';
+var MONGODB_CONNECTION_URL = '....';
 
 //connect to database
 mongoose.connect(MONGODB_CONNECTION_URL);
